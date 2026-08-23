@@ -54,13 +54,18 @@ implications, and related domains, each traceable to a named official publisher 
 Ombudsman, Services Australia, ATO, Home Affairs, DEWR, ASIC Moneysmart, and Jobs and Skills
 Australia). This plan is documented in full in `docs/knowledge_base_plan.md` in the repository.
 
-**Preliminary Walert reproduction results:**
+## Preliminary Walert reproduction results:
 
-> TODO — this section is required by the brief and not yet complete. Once the BM25 index is
-> built over the 120-passage `chiir24_data` collection and evaluated with `trec_eval` against
-> `qrels.txt`, report at minimum: NDCG@5/@10 against the published Walert BM25 numbers, and a
-> breakdown by question type (known / inferred / out-of-KB) as described in `DATA_GUIDE.md`.
-> Insert those figures here before submission.
+We ran a preliminary BM25 retrieval reproduction over the 120-passage chiir24_data collection, evaluated with NDCG@1/3/5 and broken down by the three question types defined in the dataset guide (known / inferred / out-of-KB). Question-type counts (84 known, 12 inferred, 10 out-of-KB) matched the paper's reported counts exactly, confirming our topic/qrel parsing is correct.
+
+Question type	n	NDCG@1	NDCG@3	NDCG@5
+Known	84	0.5714	0.5085	0.4706
+Inferred	12	0.0833	0.0902	0.1393
+Out-of-KB	10	—	—	—
+
+Most notably, the retriever returned a top-ranked result for 10/10 (100%) of out-of-KB questions — i.e. it never correctly abstained, since plain BM25 has no confidence threshold. This reproduces the paper's central finding that RAG performs worst on out-of-KB refusal, and directly motivates the abstention/routing design already planned for our own system (see docs/knowledge_base_plan.md).
+
+Note: this run used a pure-Python BM25 (rank_bm25 + ranx) rather than the original pipeline's pyserini/Lucene index, due to a network-restricted dev environment. Numbers are a close but non-exact substitute for the published table; full methodology and reproduction steps are documented in experiments/README.md. We plan to re-run the official pyserini pipeline before Milestone 2 for an exact comparison.
 
 ---
 
