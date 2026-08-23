@@ -34,9 +34,9 @@ Full project pipeline (src/, data/knowledge_base/) is still in development — s
 See docs/milestone1_report.md for full team member list, roles, and project progress.
 
 ## Links
-Trello board: https://trello.com/b/obfnzOND/govassist-rag-assistant
-Knowledge base plan: docs/knowledge_base_plan.md
-Milestone 1 report: docs/milestone1_report.md
+* Trello board: https://trello.com/b/obfnzOND/govassist-rag-assistant
+* Knowledge base plan: docs/knowledge_base_plan.md
+* Milestone 1 report: docs/milestone1_report.md
 ## Reference
 
 Pathiyan Cherumanal, S., et al. (2024). Walert: Putting Conversational Information Seeking Knowledge into Action by Building and Evaluating a Large Language Model-Powered Chatbot. Proceedings of CHIIR '24.
