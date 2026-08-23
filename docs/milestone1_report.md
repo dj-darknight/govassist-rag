@@ -1,169 +1,153 @@
-# WIL Project — Milestone 1 Report
+# Milestone 1 — Project Progress Report
 
-**Group ID:** `<GROUP-ID>` *(must match the Canvas group)*
-**Project name (optional):** `<PROJECT NAME>`
-**Date:** `<DD Month YYYY>`
+**Project:** GovAssist RAG — An evaluated RAG-based assistant for improving access to
+Australian Government service information
+**Unit/Subject:** Case Studies in Data Science
+**Group ID:** 49
+**Date:** 23 August 2026
 
 ---
 
-## 1. Group and Project Links
+## 1. Group Details & Links
 
-| Item | Link / Value |
-|---|---|
-| Group ID (Canvas) | `<GROUP-ID>` |
-| Trello board (teaching team has view access) | `<https://trello.com/b/XXXXXXXX/...>` |
-| GitHub repository (private) | `<https://github.com/<org-or-user>/<repo>>` |
-| README contains | Group ID, full member list, project aim, setup instructions |
-| Access | Mentor `<mentor name / GitHub handle>` to be added as collaborator on request |
+- **Group ID:** 49 (as listed on Canvas)
+- **Trello board:** https://trello.com/b/obfnzOND/govassist-rag-assistant
+
+The repository README contains the Group ID and full list of team members, and the assigned
+mentor will be given access.
 
 ---
 
 ## 2. Project Aim Statement
 
-> **Aim (one sentence):** We aim to build and rigorously evaluate a retrieval-augmented conversational agent that answers `<TARGET USER>`'s frequently asked questions about `<DOMAIN / KNOWLEDGE BASE>`, extending the Walert approach with `<YOUR EXTENSION — e.g. a larger document collection, a modern open-weight LLM, hallucination-aware answer abstention>`.
+GovAssist RAG is a retrieval-augmented assistant that helps Australians quickly find accurate,
+source-verified information about JobSeeker Payment eligibility, payments, and application
+steps — reducing the confusion and misinformation risk of navigating scattered government
+websites.
 
-### 2.1 User Stories (Connextra format)
+### User Stories
 
-| ID | User Story | Acceptance criteria |
-|---|---|---|
-| US-01 | As a **prospective student**, I want to **ask a natural-language question about program structure**, so that **I get an accurate answer without reading the entire FAQ document**. | Answer is grounded in a retrieved passage; response < 5 s. |
-| US-02 | As a **prospective student**, I want the agent to **tell me when it does not know**, so that **I am not misled by a fabricated answer**. | Out-of-KB questions return an explicit "I don't have an answer" ≥ `<X>`% of the time. |
-| US-03 | As a **prospective student**, I want to **phrase my question in my own words**, so that **I don't have to guess the exact wording used in the FAQ**. | Paraphrased query variants retrieve the same gold passage. |
-| US-04 | As a **course coordinator**, I want to **update the knowledge base without retraining the model**, so that **answers stay current at low maintenance cost**. | New document indexed and retrievable within one pipeline run. |
-| US-05 | As a **developer on the team**, I want **a reproducible evaluation harness**, so that **I can compare retrievers and generators on the same test collection**. | Single command reproduces NDCG / BERTScore / ROUGE-1 tables. |
-| US-06 | As a **teaching-team assessor**, I want **every claim in the demo traceable to a source passage**, so that **I can verify the system is not hallucinating**. | Each answer displays its supporting passage IDs. |
-
-*(Trim to 3–4 stories if page budget is tight.)*
+- As a **recently unemployed person**, I want to ask a simple question about payment
+  eligibility, so that I don't have to manually search through multiple government pages to
+  understand if I qualify.
+- As a **recently retrenched tech worker**, I want to ask about redundancy pay, tax treatment,
+  and Centrelink waiting periods in one place, so that I can plan my finances without
+  misreading a scattered set of official pages.
+- As a **sponsored visa holder who has lost their job**, I want a clear, sourced answer about
+  my visa cessation window, so that I don't rely on outdated or incorrect information found
+  online.
 
 ---
 
-## 3. Team Members
+## 3. Progress So Far
 
-| Student ID | Full Name | Proposed Role | Relevant Skills |
+The team has set up a Trello board to organise tasks, assign clear responsibilities, and
+monitor daily progress. For software development and version control, we configured a private
+GitHub repository to ensure secure code sharing, accurate tracking, and seamless collaboration.
+Supported by these defined roles and consistent team communication, we adopted an incremental
+development strategy — prioritising a stable, fully functional core system before building out
+secondary features.
+
+We also scoped the target knowledge base for our use case: a 15-subtopic taxonomy covering
+redundancy entitlements, JobSeeker eligibility and waiting periods, superannuation, visa
+implications, and related domains, each traceable to a named official publisher (Fair Work
+Ombudsman, Services Australia, ATO, Home Affairs, DEWR, ASIC Moneysmart, and Jobs and Skills
+Australia). This plan is documented in full in `docs/knowledge_base_plan.md` in the repository.
+
+## Preliminary Walert reproduction results:
+
+We ran a preliminary BM25 retrieval reproduction over the 120-passage chiir24_data collection, evaluated with NDCG@1/3/5 and broken down by the three question types defined in the dataset guide (known / inferred / out-of-KB). Question-type counts (84 known, 12 inferred, 10 out-of-KB) matched the paper's reported counts exactly, confirming our topic/qrel parsing is correct.
+
+| Question type | n | NDCG@1 | NDCG@3 | NDCG@5 |
+|---|---|---|---|---|
+| Known | 84 | 0.5714 | 0.5085 | 0.4706 |
+| Inferred | 12 | 0.0833 | 0.0902 | 0.1393 |
+| Out-of-KB | 10 | — | — | — |
+
+Most notably, the retriever returned a top-ranked result for 10/10 (100%) of out-of-KB questions — i.e. it never correctly abstained, since plain BM25 has no confidence threshold. This reproduces the paper's central finding that RAG performs worst on out-of-KB refusal, and directly motivates the abstention/routing design already planned for our own system (see docs/knowledge_base_plan.md).
+
+Note: this run used a pure-Python BM25 (rank_bm25 + ranx) rather than the original pipeline's pyserini/Lucene index, due to a network-restricted dev environment. Numbers are a close but non-exact substitute for the published table; full methodology and reproduction steps are documented in experiments/README.md. We plan to re-run the official pyserini pipeline before Milestone 2 for an exact comparison.
+
+---
+
+## 4. Planned Tasks for the Next Three Weeks
+
+**Week 1 — Dataset Preparation and Baseline Setup**
+We will collect relevant information from official Australian Government websites, focusing on
+services, payments, concessions, eligibility requirements, and application processes. The
+collected information will be cleaned and organised into a manageable knowledge base. We will
+then adapt the Walert RAG baseline to our Australian Government services use case and prepare a
+set of questions for initial testing.
+
+**Week 2 — RAG Development and Testing**
+Using the prepared knowledge base, we will develop and improve the RAG pipeline, testing how
+well the system retrieves relevant information and generates useful, well-supported answers. We
+will identify issues such as incorrect retrieval or unsupported answers and iterate accordingly.
+
+**Week 3 — Evaluation and Final Analysis**
+In the final week, we will evaluate the improved RAG system using measures such as answer
+correctness, faithfulness, and citation accuracy, and check whether the system correctly
+abstains when there is not enough supporting information. We will compare results against the
+Walert baseline, discuss strengths and limitations, and summarise key findings.
+
+---
+
+## 5. Expected Outcome
+
+By the end of the next three weeks, the team aims to have a functional early prototype of the
+Government Services RAG Assistant focused on Employment Assistance. The prototype should accept
+a user's natural language question, retrieve relevant chunks from the corpus via a vector store,
+and generate a grounded response using only retrieved content, with supporting source(s)
+displayed alongside the answer.
+
+Alongside the prototype, the team will run an initial evaluation pass using a small set of test
+questions with known answers, to verify whether responses are accurately grounded in source
+material or include hallucinated content. The project scope and technical implementation will
+continue to be refined based on these results.
+
+The overall development strategy is to first establish a reliable minimum viable RAG system for
+the chosen category, then progressively improve retrieval quality, response accuracy, usability,
+and evaluation coverage in subsequent phases — expanding to additional service categories only
+if time and technical capacity allow.
+
+---
+
+## 6. Bottlenecks & Risks
+
+- **Preliminary Walert reproduction is not yet complete** — the pinned 2023 dependency versions
+  (`faiss==1.7.4`, `huggingface-hub==0.16.4`) may require version bumps on a modern machine; any
+  deviation will be recorded.
+- **Time-sensitive government content** (e.g. tax-free thresholds, visa cessation window
+  lengths) requires careful date-stamping to avoid the system confidently quoting outdated
+  figures.
+
+---
+
+## 7. Group Members and Roles
+
+| Student ID | Full Name | Roles / Skills / Strengths | % Contribution |
 |---|---|---|---|
-| `sXXXXXXX` | `<Name>` | Team Lead / Scrum Master | Agile facilitation, stakeholder comms, Trello/Jira |
-| `sXXXXXXX` | `<Name>` | Retrieval Engineer | Python, Pyserini/Elasticsearch, BM25, dense retrieval |
-| `sXXXXXXX` | `<Name>` | LLM / Generation Engineer | HuggingFace, prompt engineering, quantised inference |
-| `sXXXXXXX` | `<Name>` | Data & Knowledge Base Lead | Data cleaning, passage chunking, annotation, qrels |
-| `sXXXXXXX` | `<Name>` | Evaluation Lead | IR metrics (NDCG, MAP), BERTScore/ROUGE, statistics |
-| `sXXXXXXX` | `<Name>` | Frontend / Integration | React or Streamlit, REST APIs, deployment, Docker |
+| 4175665 | Diya Jindal | Project Coordinator | 20% |
+| 4232687 | Divyanshu | Data & Ingestion + RAG | 20% |
+| 4192016 | Priya Prashantha | Report writing + Trello board | 20% |
+| 4187984 | Salman Beg | Documentation | 20% |
+| 4216778 | Sucheta Mohanty | Report writing | 20% |
+| **Total** | | | **100%** |
 
-*Roles are indicative; all members contribute to code review and documentation.*
-
----
-
-## 4. Progress to Date
-
-### 4.1 Team setup
-- Canvas group formed, roles assigned, weekly meeting cadence agreed (`<day/time>`), stand-up notes in Trello.
-- Private GitHub repo created with `README.md` (Group ID + members), branch protection on `main`, PR-based workflow.
-- Trello board configured with Backlog / Sprint / In Progress / Review / Done columns; Milestone 1 tasks tracked as cards.
-
-### 4.2 Reproducing the Walert RAG approach
-We cloned `https://github.com/rmit-ir/walert` and ran the pipeline in `quantitative_eval/` against the released test collection.
-
-**Testbed as released (Pathiyan Cherumanal et al., CHIIR 2024):** 120 passages and 106 questions (including paraphrase variants) split into 84 *Known* (direct answer in the FAQ), 12 *Inferred* (answer must be composed from multiple partially relevant passages), and 10 *Out-of-KB* questions (no supporting passage; the gold answer is an explicit refusal).
-
-**Pipeline reproduced:** sparse retrieval with BM25 (`k1 = 1.2`, `b = 0.75`) and dense retrieval with DPR via Pyserini, feeding the top-*k* passages (*k* ∈ {1, 3, 5}) into an instruction-tuned generator with the paper's answer-synthesis prompt (answer from retrieved documents, else return NA). Evaluation covers the retrieval stage (NDCG) and the end-to-end answer (BERTScore, ROUGE-1), reported separately per question type.
-
-**Reference (published) figures we are reproducing against:**
-
-| Approach | Cutoff *k* | Known NDCG | Known BERTScore | Known ROUGE-1 | Inferred NDCG | Inferred BERTScore | Out-of-KB % unanswered |
-|---|---|---|---|---|---|---|---|
-| Intent-Based (baseline) | – | 0.6429 | 0.771 | 0.671 | 0.0833 | 0.332 | 80 |
-| RAG (BM25 + Falcon-7B-instruct) | 1 | 0.5119 | 0.536 | 0.179 | 0.1667 | 0.493 | 0 |
-| RAG (BM25 + Falcon-7B-instruct) | 3 | 0.4912 | 0.543 | 0.209 | 0.2556 | 0.447 | 10 |
-| RAG (BM25 + Falcon-7B-instruct) | 5 | 0.4733 | 0.543 | 0.209 | 0.3291 | 0.447 | 10 |
-| RAG (DPR + Falcon-7B-instruct) | 1 | 0.6905 | 0.545 | 0.193 | 0.2500 | 0.513 | 10 |
-| RAG (DPR + Falcon-7B-instruct) | 3 | 0.6119 | 0.564 | 0.244 | 0.2350 | 0.476 | 20 |
-| RAG (DPR + Falcon-7B-instruct) | 5 | 0.5812 | 0.564 | 0.244 | 0.2350 | 0.476 | 20 |
-
-**Our reproduction (fill with your own run — do not submit the table above as your result):**
-
-| Run | Retriever | Generator | *k* | NDCG (Known) | NDCG (Inferred) | BERTScore | ROUGE-1 | % Unanswered (Out-of-KB) |
-|---|---|---|---|---|---|---|---|---|
-| R1 | BM25 | `<model>` | 1 | `<>` | `<>` | `<>` | `<>` | `<>` |
-| R2 | BM25 | `<model>` | 3 | `<>` | `<>` | `<>` | `<>` | `<>` |
-| R3 | DPR | `<model>` | 1 | `<>` | `<>` | `<>` | `<>` | `<>` |
-| R4 | DPR | `<model>` | 3 | `<>` | `<>` | `<>` | `<>` | `<>` |
-
-**Observations so far (edit to match your numbers):**
-1. Retrieval quality dominates end-to-end quality — dense retrieval gives the strongest NDCG on *Known* questions at `k = 1`.
-2. Aggressive truncation helps generation: fewer passages in the prompt yielded higher BERTScore/ROUGE-1, so more context is not automatically better.
-3. RAG clearly beats the intent-based baseline on *Inferred* questions, which require combining multiple partially relevant passages.
-4. The main weakness is abstention: the RAG configurations answer nearly every out-of-KB question instead of refusing, which is exactly the hallucination risk our project targets.
-5. `<Any deviation you observed from published numbers, e.g. different generator checkpoint, tokenizer version, or BERTScore model — state it explicitly.>`
-
-**Environment:** `<Python 3.x, Pyserini x.y, transformers x.y, GPU/CPU, seed>` — pinned in `requirements.txt`; run scripts under `/experiments`.
-
----
-
-## 5. Plan for the Next Three Weeks
-
-| Week | Sprint goal | Key tasks | Owner | Deliverable |
-|---|---|---|---|---|
-| Week 1 | Lock the baseline | Finish full reproduction across all *k*; pin dependencies; write `run_all.sh`; document metric definitions | Retrieval + Evaluation leads | Reproducible baseline table committed to repo |
-| Week 2 | Extend the pipeline | Swap in `<modern open-weight LLM>`; add `<hybrid / re-ranking>` retrieval; expand KB with `<additional documents>`; add abstention prompt + threshold | LLM + Data leads | New runs benchmarked against baseline |
-| Week 3 | Evaluate and demo | Ablation on *k* and abstention threshold; significance testing; error analysis on out-of-KB failures; minimal demo UI; draft Milestone 2 report | Whole team | Results tables, working demo, report draft |
-
-Working method: one-week sprints, Trello cards mapped to the user stories above, Monday planning and Friday review, all code merged via pull request with at least one reviewer.
-
----
-
-## 6. Risks and Bottlenecks (optional section)
-
-| # | Risk / bottleneck | Impact | Likelihood | Mitigation |
-|---|---|---|---|---|
-| R1 | Compute access for LLM inference (GPU quota / cost) | High | Medium | Use quantised 7B models; batch offline; fall back to CPU-friendly or hosted API |
-| R2 | Exact reproduction blocked by deprecated model checkpoints or library versions | Medium | Medium | Pin versions; document substitutions and report both configurations |
-| R3 | Small test collection (106 questions) limits statistical power | Medium | High | Report significance tests; extend the question set with new annotated items |
-| R4 | Hallucination on out-of-KB questions | High | High | Explicit abstention prompt, retrieval-score threshold, human spot-check |
-| R5 | Uneven workload / member availability across assessment periods | Medium | Medium | Rotate roles, pair programming, buffer in sprint plan |
-| R6 | Data sensitivity if the KB includes internal documents | Medium | Low | Keep repo private; self-host the model; no third-party API calls on sensitive text |
+All group members have been assigned to the corresponding group on Canvas.
 
 ---
 
 ## References
 
-- Pathiyan Cherumanal, S., Tian, L., Abushaqra, F. M., Magnossão de Paula, A. F., Ji, K., Ali, H., Hettiachchi, D., Trippas, J. R., Scholer, F., & Spina, D. (2024). *Walert: Putting Conversational Information Seeking Knowledge into Action by Building and Evaluating a Large Language Model-Powered Chatbot.* CHIIR '24. https://doi.org/10.1145/3627508.3638309 (preprint: arXiv:2401.07216)
-- Walert code and data: https://github.com/rmit-ir/walert
-- Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS.
-- Karpukhin, V. et al. (2020). *Dense Passage Retrieval for Open-Domain Question Answering.* EMNLP.
-- Robertson, S. E. et al. (1995). *Okapi at TREC-3.*
-- Lin, J. et al. (2021). *Pyserini: A Python Toolkit for Reproducible Information Retrieval Research.* SIGIR.
-- Zhang, T. et al. (2020). *BERTScore: Evaluating Text Generation with BERT.* ICLR.
-- Lin, C.-Y. (2004). *ROUGE: A Package for Automatic Evaluation of Summaries.* ACL Workshop.
-- Järvelin, K., & Kekäläinen, J. (2002). *Cumulated Gain-Based Evaluation of IR Techniques.* ACM TOIS.
-
----
-
-## Appendix A — README template for the GitHub repo
-
-```markdown
-# <Project Name> — WIL Project
-**Group ID:** <GROUP-ID>
-
-## Team
-| Student ID | Name | Role |
-|---|---|---|
-| sXXXXXXX | <Name> | Team Lead |
-| ... | ... | ... |
-
-## Aim
-<One-sentence aim statement>
-
-## Repository structure
-- `data/`        knowledge base passages, questions, qrels
-- `src/`         retrieval and generation pipeline
-- `experiments/` run scripts and configs
-- `results/`     metric outputs
-
-## Setup
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-bash experiments/run_all.sh
-
-## Links
-- Trello: <link>
-- Milestone reports: `docs/`
-```
+- Es, S., James, J., Espinosa Anke, L., & Schockaert, S. (2024). RAGAs: Automated Evaluation of
+  Retrieval Augmented Generation. *Proceedings of EACL 2024*, 150–158.
+- Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y. J., Madotto, A., &
+  Fung, P. (2023). Survey of hallucination in natural language generation. *ACM Computing
+  Surveys, 55*(12), Article 248. https://doi.org/10.1145/3571730
+- Karpukhin, V., Oğuz, B., Min, S., Lewis, P., Wu, L., Edunov, S., Chen, D., & Yih, W. (2020).
+  Dense passage retrieval for open-domain question answering. *Proceedings of the 2020
+  Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 6769–6781.
+  https://doi.org/10.48550/arXiv.2004.04906
+- Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.
+  *Advances in Neural Information Processing Systems*, 33.
