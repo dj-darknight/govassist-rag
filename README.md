@@ -1,4 +1,4 @@
-## An evaluated RAG-based assistant for improving access to Australian Government service information — WIL Project
+### An evaluated RAG-based assistant for improving access to Australian Government service information — WIL Project
 
 ## Group ID: 49
 
