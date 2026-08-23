@@ -7,19 +7,17 @@
 A retrieval-augmented assistant that helps recently retrenched Australian tech workers find accurate, source-grounded information on redundancy entitlements, JobSeeker eligibility, visa implications, and reskilling pathways — extending the Walert (Pathiyan Cherumanal et al., 2024) approach with a larger, higher-stakes domain and explicit hallucination-aware abstention.
 
 ## Repository structure
-data/walert_baseline/ 
-— Walert reproduction dataset, used to baseline our pipeline
-data/knowledge_base/ 
-— our own ~150–200 passage corpus across 15 subtopics (not yet built — see docs/knowledge_base_plan.md for the taxonomy and sourcing plan)
-src/ 
-— retrieval, generation, and evaluation pipeline (not yet started)
-experiments/ 
-— run scripts and configs (currently: run_bm25_eval.py, a preliminary BM25 reproduction over the Walert baseline collection, with methodology notes in experiments/README.md)
-results/ 
-— metric outputs
-docs/ 
-— milestone reports and the knowledge base plan (milestone1_report.md, knowledge_base_plan.md)
-Setup
+
+* `data/walert_baseline/` — Walert reproduction dataset, used to baseline our pipeline
+* `data/knowledge_base/` — our own ~150–200 passage corpus across 15 subtopics
+  *(not yet built — see `docs/knowledge_base_plan.md` for the taxonomy and sourcing plan)*
+* `src/` — retrieval, generation, and evaluation pipeline *(not yet started)*
+* `experiments/` — run scripts and configs
+  *(currently: `run_bm25_eval.py`, a preliminary BM25 reproduction over the Walert baseline
+  collection, with methodology notes in `experiments/README.md`)*
+* `results/` — metric outputs
+* `docs/` — milestone reports and the knowledge base plan
+  (`milestone1_report.md`, `knowledge_base_plan.md`)
 
 ## Preliminary Walert BM25 reproduction (what's runnable today):
 
